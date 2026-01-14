@@ -1,8 +1,9 @@
+import { profileService } from '@/src/services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import { useNavigation } from 'expo-router';
-import React, { useState } from 'react';
-import { KeyboardAvoidingView, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function completeProfile() {
     const navigation = useNavigation<any>();
@@ -10,13 +11,33 @@ export default function completeProfile() {
      const[yoe, setYoe]= useState(''); //Years of experience
       const[certifications, setCertifications]= useState('');
       
-      const[preferedShift, setPreferedShift]=useState('');
+      const[preferedShift, setPreferedShift]=useState('morning');
       const[department, setDepartment]=useState('')
-      const[role, setRole]=useState('')
-      const[hospital, setHospital]=useState('')
+      const[role, setRole]=useState('staff')
+      const[facility, setFacility]=useState('')
       const[employeeid, setemployeeId]=useState('')
       const[step1, setStep1]=useState(true);
       const[step2, setStep2]=useState(false);
+      const[loading, setLoading]=useState(false)
+
+  type Facility = { _id: string; name: string };
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [selectedFacilityId, setSelectedFacilityId] = useState('');
+  
+  // Load the list of hospitals when screen opens
+  useEffect(() => {
+    const loadFacilities = async () => {
+      try {
+        const list = await profileService.getFacilities();
+          console.log('facilities' ,list)
+        setFacilities(list); // list = [{ _id: '123', name: 'General Hospital'}, ...]
+      } catch (err) {
+        console.log('Could not load facilities');
+      }
+    };
+    loadFacilities();
+  }, []);
+  
 
       const setstep2=()=>{
         setStep2(true)
@@ -26,6 +47,71 @@ export default function completeProfile() {
         setStep1(true)
         setStep2(false)
       }
+
+   
+
+
+
+
+      const handleStep1Submit = async () => {
+  setLoading(true);
+  try {
+    const step1Data = {
+      department: department, 
+      role: 'staff',
+      //facility: selectedFacilityId,   
+      employeeId: employeeid  
+    };
+
+    // Send to backend
+  await profileService.updateProfile(step1Data);
+    //console.log('LOADED  update PROFILE:', profile);
+    
+    Alert.alert('Step 1 Success', 'Profile update success',[ {onPress:setstep2}])
+    setstep2
+    console.log('STATUS:' , )
+    
+    // Success! Navigate to Step 2
+   
+
+  } catch (error) {
+    Alert.alert('Error', 'Could not save profile data.', );
+    console.log(error)
+    
+  } finally {
+    setLoading(false);
+  }
+      };
+
+      const handleStep2Submit = async () => {
+  setLoading(true);
+  try {
+   
+    const step2Data = {
+
+      phoneNumber: phone,          
+      preferredShiftType: preferedShift,   
+      yearsOfExperience: parseInt(yoe), 
+      extraCertifications: certifications  
+    };
+
+    await profileService.updateProfile(step2Data);
+     Alert.alert('Step 2 Success', 'Profile update success')
+    
+    
+    // Success! Navigate to Home Dashboard
+    navigation.replace('home'); 
+    //navigation.reset({index: 0,routes: [{ name: 'home' }],});
+  } catch (error) {
+    Alert.alert('Error', 'Could not complete profile.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
   return (
     <KeyboardAvoidingView style={[{flex:1}]} behavior='padding'>
 
@@ -48,6 +134,90 @@ export default function completeProfile() {
         <View style={[step1 && {backgroundColor: '#0097B2'},step2 && {backgroundColor: '#0097B2'} ,{height:6,width:'47%',borderRadius:3}]}></View>
         <View style={[step1 && {backgroundColor: 'grey'},step2 && {backgroundColor: '#0097B2'},{height:6,width:'47%',borderRadius:3}]}></View>
       </View>
+
+        {step1 && (
+
+        <View>
+            <Text style={styles.label} >Department</Text>
+            <View style={[styles.textInputView,{alignItems:'center' },]}>
+                <Picker 
+                    selectedValue={department}
+                    style={{height: 50, width:'100%', }}
+                    onValueChange={(itemValue, itemIndex) =>{
+                      console.log("User selected:", itemValue);
+                      setDepartment(itemValue)}
+                      }>
+                    <Picker.Item label="Select Department..." value="" color="#999" />    
+                    <Picker.Item label="Emergency" value="Emergency" />
+                    <Picker.Item label="Pediatrics" value="Pediatrics" />
+                    <Picker.Item label="ICU" value="ICU" />
+                </Picker>
+            </View>
+            <Text style={styles.label} >Role/Position</Text>
+            <View style={[styles.textInputView,{alignItems:'center' },]}>
+                <Picker
+                    selectedValue={role}
+                    style={{height: 50, width:'100%', }}
+                    onValueChange={(itemValue) =>{
+                       console.log("User selected:", itemValue);
+                       setRole(itemValue)}}>
+                      <Picker.Item label='select role' value=""></Picker.Item>
+                    <Picker.Item label="Nurse" value="nurse" />
+                    <Picker.Item label="Doctor" value="doctor" />
+                    <Picker.Item label="Technician" value="technician" />
+                </Picker>
+            </View>
+
+            <Text style={styles.label} >Hospital/Facility</Text>
+
+            <View style={[styles.textInputView,{alignItems:'center' },]}>
+                <Picker
+                  selectedValue={selectedFacilityId}
+                  style={{height: 50, width:'100%', }}
+                  onValueChange={(itemValue) => setSelectedFacilityId(itemValue)}
+                >
+                  <Picker.Item label="Select a Hospital..." value="" />
+                  {facilities.map((fac) => (
+                    <Picker.Item 
+                      key={fac._id}       // MongoDB ID as key
+                      label={fac.name}    // Show Name to user
+                      value={fac._id}     // Save ID to state
+                    />
+                  ))}
+                </Picker>
+              </View>
+            <View style={[styles.textInputView,{flexDirection:'row',alignItems:'center'},]}>
+                <Ionicons name='location' size={16}/>
+                
+                <TextInput style={[,{color:"#000000",fontSize:16,paddingLeft:5, width:'90%'}]}
+                        value={facility}
+                        onChangeText={setFacility}
+                        placeholder='City General Hospital' 
+                    />
+            </View>
+
+
+            <Text style={styles.label} >Employee ID</Text>
+            <View style={[styles.textInputView,{flexDirection:'row',alignItems:'center'},]}>
+                <Ionicons name='person' size={16}/>
+                
+                <TextInput style={[,{color:"#000000",fontSize:16,paddingLeft:5, width:'90%'}]}
+                        value={employeeid}
+                        onChangeText={setemployeeId}
+                        placeholder='EMP123456' 
+                    />
+            </View>
+
+            <Pressable onPress={handleStep1Submit} style={[styles.button,{borderWidth:1, borderColor:'#0097B2'}]}>
+            <Text style={[styles.buttonText,]}>Continue</Text>
+            </Pressable>
+
+
+        </View>
+
+      )}
+
+       
 
       {step2 && (
         <View>
@@ -101,7 +271,7 @@ export default function completeProfile() {
          
 
         <View style={{paddingTop:60}}>
-             <Pressable onPress={() => navigation.navigate('signUp')} style={styles.button}>
+             <Pressable onPress={handleStep2Submit} style={styles.button}>
             <Text style={styles.buttonText}>Complete Setup</Text>
         </Pressable>
 
@@ -118,63 +288,7 @@ export default function completeProfile() {
 
       )}
 
-      {step1 && (
-
-        <View>
-            <Text style={styles.label} >Department</Text>
-            <View style={[styles.textInputView,{alignItems:'center' },]}>
-                <Picker 
-                    selectedValue={department}
-                    style={{height: 50, width:'100%', }}
-                    onValueChange={(itemValue) => setDepartment(itemValue)}>
-                    <Picker.Item label="Nursing" value="nursing" />
-                    <Picker.Item label="Medical" value="medical" />
-                    <Picker.Item label="Surgical" value="surgical" />
-                </Picker>
-            </View>
-            <Text style={styles.label} >Role/Position</Text>
-            <View style={[styles.textInputView,{alignItems:'center' },]}>
-                <Picker
-                    selectedValue={role}
-                    style={{height: 50, width:'100%', }}
-                    onValueChange={(itemValue) => setRole(itemValue)}>
-                    <Picker.Item label="Nurse" value="nurse" />
-                    <Picker.Item label="Doctor" value="doctor" />
-                    <Picker.Item label="Technician" value="technician" />
-                </Picker>
-            </View>
-
-            <Text style={styles.label} >Hospital/Facility</Text>
-            <View style={[styles.textInputView,{flexDirection:'row',alignItems:'center'},]}>
-                <Ionicons name='location' size={16}/>
-                
-                <TextInput style={[,{color:"#000000",fontSize:16,paddingLeft:5, width:'90%'}]}
-                        value={hospital}
-                        onChangeText={setHospital}
-                        placeholder='City General Hospital' 
-                    />
-            </View>
-
-
-            <Text style={styles.label} >Employee ID</Text>
-            <View style={[styles.textInputView,{flexDirection:'row',alignItems:'center'},]}>
-                <Ionicons name='person' size={16}/>
-                
-                <TextInput style={[,{color:"#000000",fontSize:16,paddingLeft:5, width:'90%'}]}
-                        value={employeeid}
-                        onChangeText={setemployeeId}
-                        placeholder='EMP123456' 
-                    />
-            </View>
-
-            <Pressable onPress={setstep2} style={[styles.button,{borderWidth:1, borderColor:'#0097B2'}]}>
-            <Text style={[styles.buttonText,]}>Continue</Text>
-            </Pressable>
-
-
-        </View>
-
-      )}
+    
        
        
     </View>

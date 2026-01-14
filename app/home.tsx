@@ -1,10 +1,103 @@
-import { Ionicons } from '@expo/vector-icons'
-import React from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { profileService, shiftService } from '@/src/services/api';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 export default function home() {
+
+  type Shift = {
+    id: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  };
+
+  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+   const [userData, setUserData] = useState({
+      name: '',
+      email: '',
+      department: '',
+      phoneNumber: '',
+      role: '',
+    });
+  
+  
+          useEffect(() => {
+      loadProfile();
+    }, []);
+  
+   const loadProfile = async () => {
+    try {
+      setLoading(true);
+      const user = await profileService.getProfile(); // Now returns the clean 'profile' object
+      
+      console.log('LOADED PROFILE:', user); // Check this log!
+  
+      setUserData({
+        name: user.name || '',
+        email: user.email || '',
+        // Ensure we access the correct fields from your JSON
+        department: user.department || '',
+        phoneNumber: user.phoneNumber || '',
+        role: user.role || 'staff',
+        // Add these if you have inputs for them
+        //employeeId: profile.employeeId || '',
+        //preferredShiftType: profile.preferredShiftType || '',
+       // yearsOfExperience: profile.yearsOfExperience ? String(profile.yearsOfExperience) : '',
+        //extraCertifications: profile.extraCertifications || ''
+      });
+  
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+  // 1. Function to Fetch Data
+  const loadShifts = async () => {
+    try {
+      // You can pass filters here later, e.g., { department: 'ICU' }
+      const data = await shiftService.getAvailableShifts();
+      setShifts(data);
+    } catch (error) {
+      console.error(error);
+      // Optional: Show a subtle toast instead of an Alert for a feed error
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // 2. Load on Mount
+  useEffect(() => {
+    loadShifts();
+  }, []);
+
+  // 3. Handle Pull-to-Refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadShifts();
+  };
+   
+   const showschedule=()=>{
+      navigation.navigate('mySchedule')
+   }
+    const showavailableswap=()=>{
+      navigation.navigate('availableSwap')
+   }
+    const navigation = useNavigation<any>();
   return (
-    <ScrollView style={{ flex:1}}>
+    <View style={{ flex:1}}>
         <View style={styles.card}>
 
             <View style={{alignItems:"center", justifyContent:"space-between"}}>
@@ -17,7 +110,7 @@ export default function home() {
                         </View>
                         <View>
                             <Text style={{fontSize:18, fontWeight:"semibold",color:"white"}}>Welcome back,</Text>
-                            <Text style={{fontSize:24, fontWeight:"semibold",color:"white"}}>Alex Johnson</Text>
+                            <Text style={{fontSize:24, fontWeight:"semibold",color:"white"}}>{userData.name}</Text>
                         </View>
 
                     </View>
@@ -33,13 +126,25 @@ export default function home() {
                  <View style={{flexDirection:'row'}}>
                     <View style={styles.cardin}>
                         <Ionicons name='call-outline' size={16}/>
-                        <Text style={{fontSize:16, fontWeight:'semibold'}}>My schedule</Text>
+                        <Pressable onPress={showschedule
+                        
+                        }>
+                           <Text style={{fontSize:16, fontWeight:'semibold'}}>My schedule</Text>
+
+                        </Pressable>
+                        
 
                     </View>
 
                     <View style={styles.cardin}>
                         <Ionicons name='call-outline' size={16}/>
-                        <Text style={{fontSize:16, fontWeight:'semibold'}}>Find swaps</Text>
+                        <Pressable onPress={showavailableswap
+                        
+                        }>
+                           <Text style={{fontSize:16, fontWeight:'semibold'}}>Find swaps</Text>
+
+                        </Pressable>
+                        
                     </View>
 
               </View>
@@ -49,10 +154,6 @@ export default function home() {
 
             </View>
 
-            
-           
-           
-
         </View>
 
          <View style={{flexDirection:'row', alignItems:'center', padding:10}}>
@@ -61,30 +162,40 @@ export default function home() {
             <Text style={{fontSize:17, fontWeight:"semibold",color:"black", padding:5}}>Upcoming shifts</Text>
              
          </View>
+         
+         <FlatList
+         data={shifts}
+         keyExtractor={(item) => item.id}
+         refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={
+          <Text style={{ textAlign: 'center', marginTop: 50, color: '#777' }}>
+            No shifts available for swap right now.
+          </Text>
+        }
+        renderItem={({item})=>(
 
-         <View style={styles.upcomingcard}>
+          <View style={styles.upcomingcard}>
             <View style={{flexDirection:"row", justifyContent:'space-between'}}>
-                <Text style={styles.text}>Jan  Friday</Text>
+                <Text style={styles.text}>Jan  Friday {item.date}</Text>
                 <Text style={styles.text}>Day shift</Text>
 
             </View>
             
 
-            <Text style={styles.text}> 3   7:00am-3:00pm</Text>
+            <Text style={styles.text}> 3   {item.startTime} - {item.endTime}</Text>
 
          </View>
 
-          <View style={styles.upcomingcard}>
-            <View style={{flexDirection:"row",justifyContent:'space-between'}}>
-                <Text style={styles.text}>Jan  Sunday</Text>
-                <Text style={styles.text}>Evening shift</Text>
+        )}
+         
+         
+         ></FlatList>
 
-            </View>
-            
 
-            <Text style={styles.text}> 5   3:00am-10:00pm</Text>
 
-         </View>
+
 
          <View style={{ alignItems:'center'}}>
        
@@ -110,7 +221,7 @@ export default function home() {
 
          </View>
      
-    </ScrollView>
+    </View>
   )
 }
 

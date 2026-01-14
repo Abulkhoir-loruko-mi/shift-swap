@@ -1,7 +1,10 @@
+import { authServices } from '@/src/services/api';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+
 
 interface FormErrors{
   name?:string;
@@ -10,26 +13,25 @@ interface FormErrors{
 }
 
 
-interface UserData{
-  name:string;
-  email:string;
-  signupDate:string
-}
 
 export default function signUp() {
      const navigation = useNavigation<any>();
 
       const [errors, setErrors] = useState<FormErrors>({});
     //const [formData, setFormData] = useState<FormData>({name:'',email:'',password:''});
-  const[isSubmitting, setIsSubmitting]= useState(false)
+  
  
     const[name, setName]= useState('');
     const[email, setEmail]= useState('');
-    const[phone, setPhone]= useState('');
+    const[emails, setEmails]= useState('');
+    const[phoneNumber, setPhoneNumber]= useState('');
     const[password, setPassword]= useState('');
+    const[passwords, setPasswords]= useState('');
     const[loading, setLoading]=useState(false);
     const[login, setLogin]=useState(true);
     const[signup, setSignup]= useState(false);
+    const[department, setDepartment]= useState('Emergency');
+    const[facility, setFacility]= useState('facility')
 
     const showlogin=()=>{
         setLogin(true);
@@ -39,8 +41,129 @@ export default function signUp() {
         setSignup(true);
         setLogin(false);
     }
+
+  const API_BASE_URL  = 'https://shiftswap-backend-4w40.onrender.com/api';
+
+  const handleRegisters= async ()=>{
+
+    try {
+      const response= await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+            body: JSON.stringify({
+        name: name,
+        email: emails,
+        password:passwords,
+        phoneNumber:phoneNumber,
+        role: 'staff', // 'staff' or 'manager'
+        department: 'Emergency',
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.message || "reg failed");
+    }
+    await AsyncStorage.setItem('token',data.data.token)
+    console.log('reg succesful:', data.data)
+    return data.data
+    } catch (error) {
+      console.error('reg error', error)
+      throw error    
+    }
+  }
+
+  const handleRegisterss=async ()=>{
+    setLoading(true);
+    try {
+      await handleRegisters();
+      showlogin   
+    } catch (error) {
+      console.log(error)  
+    }finally{
+      setLoading(false)
+    }
+  }
+
+    const handleRegister = async () => {
+    // 1. Basic Validation
+  
+
+    setLoading(true);
+
+    try {
+      // 2. Prepare the payload based on API docs
+      const userData = {
+        name,
+        email,
+        password,
+        role: 'staff', // Hardcoded as per mobile app requirements
+        phoneNumber:phoneNumber,
+        department:"Emergency",
+      };
+
+      // 3. Call the API
+      await authServices.register(userData);
+
+      setLoading(false);
+      
+      // 4. Success: Redirect to Login
+      Alert.alert(
+        'Success', 
+        'Account created successfully! Please login.',
+        [{ text: 'OK', onPress: showlogin }]
+      );
+
+    } catch (error) {
+      setLoading(false);
+      const message = error instanceof Error ? error.message : String(error);
+      // Extract error message from backend response if available
+      //const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
+      Alert.alert('Registration Failed', message);
+    }
+  };
+
+
+
+
+
+      const handleLogin = async () => {
+
+         if ( !email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    setLoading(true);
+        try {
+          const result = await authServices.login(email, password);
+
+          console.log('login result', result)
+          
+          const token = result.data.token || result.token;
+
+          if (token) {
+              await AsyncStorage.setItem('userToken', token);
+              navigation.replace('completeProfile'); 
+            
+          }else{
+            Alert.alert('Login error', 'No access token received from server')
+          }
+    
+          
+        } catch (error) {
+          
+          const message = error instanceof Error ? error.message : String(error);
+          Alert.alert('Login Failed', message);
+          setLoading(false);
+        }
+      };
+
   return (
-   <KeyboardAvoidingView style={{flex:1, padding:20, backgroundColor:'white'}}  >
+   <ScrollView style={{flex:1, padding:20, backgroundColor:'white'}}  >
       <Ionicons name="logo-react" size={100} style={styles.shiftswaplogo} />
 
       <Text style={[{ fontWeight:'semibold'}, styles.titletext]}>Welcome to ShiftSwap</Text>
@@ -48,17 +171,19 @@ export default function signUp() {
 
        <View style={styles.textInputView}>
       
-                  <View style={[styles.innertextInputView, {},login && {backgroundColor: '#0097B2'}]}>
-                      <Pressable onPress={showlogin}>
+                 
+                      <TouchableOpacity onPress={showlogin} style={[styles.innertextInputView, {},login && {backgroundColor: '#0097B2'}]}>
+                        
                           <Text style={[[styles.text,login && {color: 'white'}]]}>Login</Text>
-                      </Pressable>
-                  </View>
+
+                      </TouchableOpacity>
+                 
       
-                   <View style={[styles.innertextInputView, signup && {backgroundColor: '#0097B2'}]}>
-                      <Pressable onPress={showsignup}>
+                   
+                      <Pressable onPress={showsignup} style={[styles.innertextInputView, signup && {backgroundColor: '#0097B2'}]}>
                           <Text style={[styles.text, signup && {color: 'white'}]}>Sign Up</Text>
                       </Pressable>
-                  </View>
+                  
       
               </View>
       <View>
@@ -96,8 +221,14 @@ export default function signUp() {
           </View>
           </Pressable>
 
-          <Pressable style={styles.button} onPress={() => navigation.navigate('home')}>
+          <Pressable style={styles.button} disabled={loading} onPress={handleLogin}>
+                      {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
             <Text style={styles.buttontext}>Login</Text>
+          )}
+
+           
           </Pressable>
 
            <View style={{marginTop:20, marginBottom:20, flexDirection:'row', alignItems:'center', justifyContent:'center', gap:5}}>
@@ -110,7 +241,7 @@ export default function signUp() {
       )}
 
       {signup && (
-        <View>
+        <KeyboardAvoidingView>
                   <Text style={styles.label}>Name</Text>
                   <TextInput style={[styles.textInput,errors.name && styles.inputError]}
                     value={name}
@@ -124,9 +255,9 @@ export default function signUp() {
                       {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
                 <Text style={styles.label}>Email</Text>
                 <TextInput style={styles.textInput}
-                    value={email}
+                    value={emails}
                     onChangeText={(text)=>{
-                      setEmail(text);
+                      setEmails(text);
                       if(errors.email) setErrors({...errors, email:undefined});
                     }}
                     placeholder='Enter your Mail'
@@ -136,23 +267,29 @@ export default function signUp() {
                 />
                 <Text style={styles.label}>Phone Number</Text>
                 <TextInput style={styles.textInput}
-                    value={phone}
-                    onChangeText={setPhone}
+                    value={phoneNumber}
+                    onChangeText={setPhoneNumber}
                     placeholder='Phone Number'
                     keyboardType='phone-pad'
                 />
                 <Text style={styles.label}>Password</Text>
                 <TextInput style={styles.textInput}
-                    value={password}
-                    onChangeText={setPassword}
+                    value={passwords}
+                    onChangeText={setPasswords}
                     placeholder='Password'
                     secureTextEntry={true}
                     autoCorrect={false}
                     autoCapitalize="none"
                 />
       
-                <Pressable style={styles.button} onPress={() => navigation.navigate('home')}>
-                  <Text style={styles.buttontext}>Sign Up</Text>
+                <Pressable style={styles.button} disabled={loading} onPress={handleRegister}>
+                            {loading ? (
+                            <ActivityIndicator color="#fff" />
+                          ) : (
+                            <Text style={styles.buttontext}>Sign Up</Text>
+                          )}
+
+                  
                 </Pressable>
 
                 <View style={{marginTop:20, marginBottom:20, flexDirection:'row', alignItems:'center', justifyContent:'center', gap:5}}>
@@ -160,9 +297,9 @@ export default function signUp() {
                   <Text style={{color:'#0097B2'}}>By continuing you agree to our terms of Service and Privacy Policy</Text>
                 </View>
 
-        </View>
+        </KeyboardAvoidingView>
       )}
-    </KeyboardAvoidingView>
+    </ScrollView>
   )
 }
 
@@ -190,7 +327,7 @@ const styles = StyleSheet.create({
         color: '#0097B2',
         fontSize: 16,
         
-        padding:5,
+        
     },
     titletext:{
         color: '#0097B2',
@@ -231,7 +368,7 @@ const styles = StyleSheet.create({
         marginTop:20,
         borderRadius:20,
         backgroundColor:'#F1F1F1',
-       // height:40
+       // height:60
       
         //textAlign: 'center',
     },
@@ -241,6 +378,7 @@ const styles = StyleSheet.create({
         borderRadius:20,
         width:'45%',
         padding:8,
+       
     },
 
     blacktext:{

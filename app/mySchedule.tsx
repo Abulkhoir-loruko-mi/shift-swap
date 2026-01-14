@@ -1,9 +1,51 @@
+import { shiftService } from '@/src/services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+
 
 export default function mySchedule() {
+
+     type Shift = {
+        id: string;
+        date: string;
+        startTime: string;
+        endTime: string;
+      };
+    
+      const [shifts, setShifts] = useState<Shift[]>([]);
+      const [loading, setLoading] = useState(true);
+      const [refreshing, setRefreshing] = useState(false);
+    
+    
+    
+    
+      // 1. Function to Fetch Data
+      const loadShifts = async () => {
+        try {
+          // You can pass filters here later, e.g., { department: 'ICU' }
+          const data = await shiftService.getAvailableShifts();
+          setShifts(data);
+        } catch (error) {
+          console.error(error);
+          // Optional: Show a subtle toast instead of an Alert for a feed error
+        } finally {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      };
+    
+      // 2. Load on Mount
+      useEffect(() => {
+        loadShifts();
+      }, []);
+    
+      // 3. Handle Pull-to-Refresh
+      const onRefresh = () => {
+        setRefreshing(true);
+        loadShifts();
+      };
 
      const navigation = useNavigation<any>();
     const[upcoming, setUpcoming]=useState(true)
@@ -32,17 +74,17 @@ export default function mySchedule() {
 
         <View style={styles.textInputView}>
 
-            <View style={[styles.innertextInputView, {},upcoming && {backgroundColor: 'white'}]}>
-                <Pressable onPress={showUpcoming}>
+           
+                <Pressable onPress={showUpcoming} style={[styles.innertextInputView, {},upcoming && {backgroundColor: 'white'}]}>
                     <Text style={styles.text}>Upcoming</Text>
                 </Pressable>
-            </View>
+            
 
-             <View style={[styles.innertextInputView, past && {backgroundColor: 'white'}]}>
-                <Pressable onPress={showPast}>
+            
+                <Pressable onPress={showPast} style={[styles.innertextInputView, past && {backgroundColor: 'white'}]}>
                     <Text style={styles.text}>Past</Text>
                 </Pressable>
-            </View>
+           
 
         </View>
 
@@ -58,9 +100,20 @@ export default function mySchedule() {
                     </View>
 
                 </View>
-                <ScrollView style={{padding:5}}>
 
-                    <View style={styles.availableswapcard}>
+                 <FlatList
+                         data={shifts}
+                         keyExtractor={(item) => item.id}
+                         refreshControl={
+                          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                        }
+                        ListEmptyComponent={
+                          <Text style={{ textAlign: 'center', marginTop: 50, color: '#777' }}>
+                            No shifts available for swap right now.
+                          </Text>
+                        }
+                        renderItem={({item})=>(
+                                <View style={styles.availableswapcard}>
                 
                             <View style={{}}>
                                 <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
@@ -90,108 +143,16 @@ export default function mySchedule() {
                 
                              
                         </View>
-                     <View style={styles.availableswapcard}>
-                
-                            <View style={{}}>
-                                <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                                <Text  style={styles.blacktext}> January 8, 2025</Text>
-                                <View style={styles.typeSHiftcard}>
-                                    <Text style={styles.shifttext}>Day shift</Text>
-                                </View>
-                            </View>
-                
-                            </View>
-                
-                            
-                          <Text style={styles.text}>Saturday</Text>
-                          
-                            <View style={{flexDirection:'row', alignItems:'center', }}>
-                                <Ionicons name='time'color='black' size={16}/>
-                                <Text  style={styles.blacktext}>7:00 AM- 3:00PM</Text>
-                            </View>
-                             <View style={{flexDirection:'row', alignItems:'center', }}>
-                                <Ionicons name='location'color='black' size={16}/>
-                                <Text style={styles.blacktext}>Emergency Department</Text>
-                            </View>
-
-                            <Pressable onPress={requestSwap} style={styles.button}>
-                                <Text style={styles.buttonText}>Request Swap</Text>
-                            </Pressable>
-                
-                             
-                        </View>
-
-                    <View style={styles.availableswapcard}>
-        
-                    <View style={{}}>
-                        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                        <Text  style={styles.blacktext}> January 8, 2025</Text>
-                        <View style={styles.typeSHiftcard}>
-                            <Text style={styles.shifttext}>Evening shift</Text>
-                        </View>
-                    </View>
-        
-                    </View>
-        
-                    
-                    <Text style={styles.text}>Saturday</Text>
-                    
-                    <View style={{flexDirection:'row', alignItems:'center', }}>
-                        <Ionicons name='time'color='black' size={16}/>
-                        <Text  style={styles.blacktext}>7:00 AM- 3:00PM</Text>
-                    </View>
-                        <View style={{flexDirection:'row', alignItems:'center', }}>
-                        <Ionicons name='location'color='black' size={16}/>
-                        <Text style={styles.blacktext}>Emergency Department</Text>
-                    </View>
-
-                    <Pressable onPress={requestSwap} style={styles.button}>
-                        <Text style={styles.buttonText}>Request Swap</Text>
-                    </Pressable>
-        
                         
-                </View>
-                    <View style={styles.availableswapcard}>
-        
-                    <View style={{}}>
-                        <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                        <Text  style={styles.blacktext}> January 8, 2025</Text>
-                        <View style={styles.typeSHiftcard}>
-                            <Text style={styles.shifttext}>Day shift</Text>
-                        </View>
-                    </View>
-        
-                    </View>
-        
-                    
-                    <Text style={styles.text}>Saturday</Text>
-                    
-                    <View style={{flexDirection:'row', alignItems:'center', }}>
-                        <Ionicons name='time'color='black' size={16}/>
-                        <Text  style={styles.blacktext}>7:00 AM- 3:00PM</Text>
-                    </View>
-                        <View style={{flexDirection:'row', alignItems:'center', }}>
-                        <Ionicons name='location'color='black' size={16}/>
-                        <Text style={styles.blacktext}>Emergency Department</Text>
-                    </View>
-
-                    <Pressable onPress={requestSwap} style={styles.button}>
-                        <Text style={styles.buttonText}>Request Swap</Text>
-                    </Pressable>
-        
-                        
-                </View>
-
-                 <View style={{marginBottom:50}}>
-                        
-                                            <View>
-                                                
-                                            </View>
-                                        </View>
+                
+                        )}
+                         
+                         
+                         ></FlatList>
+                
 
 
-                </ScrollView>
-
+               
                  
         
 

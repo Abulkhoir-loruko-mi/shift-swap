@@ -15,7 +15,7 @@ export default function RootLayout() {
         <Stack.Screen name="signUp" options={{ headerShown: false }} />
         <Stack.Screen name="mySchedule" options={{ headerShown: true, title:'My Schedule',headerTintColor:'#00797B', }} />
         <Stack.Screen name="availableSwap" options={{ headerShown: true, title:'Available Swap',headerTintColor:'#00797B', }} />
-         <Stack.Screen name="swapRequestDetail" options={{ headerShown: true, title:'Swap Request Details',headerTintColor:'#00797B', }} />
+         <Stack.Screen name="swapRequestDetails" options={{ headerShown: true, title:'Swap Request Details',headerTintColor:'#00797B', }} />
           <Stack.Screen name="requestShiftSwap" options={{ headerShown: true, title:'Request shift Swap',headerTintColor:'#00797B', }} />
         <Stack.Screen name="completeProfile" options={{ headerShown: false }} />
        
