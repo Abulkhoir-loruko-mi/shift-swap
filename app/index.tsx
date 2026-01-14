@@ -1,14 +1,19 @@
 import { useNavigation } from "expo-router";
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function index() {
      const navigation = useNavigation<any>();
   return (
-    <View>
+    <View style={{flex:1,marginTop:20, padding:20, backgroundColor:'white', alignItems:'center'}}>
+
+        <Image source={require('@/assets/images/Logo.png')} style={styles.shiftswaplogo}></Image>
+
+      <Text style={[{ fontWeight:'semibold'}, styles.titletext]}>Welcome to ShiftSwap</Text>
+      <Text style={styles.text}>Manage your hospital shifts with ease</Text>
       
       <Pressable onPress={() => navigation.navigate('signUp')} style={styles.button}>
-        <Text style={styles.button}>Already have an account? Login</Text>
+        <Text style={styles.button}>Get started</Text>
       </Pressable>
       <Pressable onPress={() => navigation.navigate('completeProfile')} style={styles.button}>
         <Text style={styles.button}>profile</Text>
@@ -33,10 +38,35 @@ export default function index() {
 }
 
 const styles = StyleSheet.create({
+   shiftswaplogo:{
+    width:100,
+    height:100,
+    resizeMode:'contain',
+    alignSelf:'center',
+    marginBottom:20,
+    color:'#0097B2',
+
+  },
+   text:{
+        color: '#0097B2',
+        fontSize: 16,
+        
+        
+    },
+    titletext:{
+        color: '#0097B2',
+        fontSize: 24,
+        textAlign: 'center',
+        padding:5,
+        fontWeight:'bold',
+    },
 button: {
         backgroundColor: '#0097B2',
         padding: 10,
         borderRadius: 5,
-        margin:10
+        margin:20,
+        height:50,
+        width:100,
+        marginTop:10
     },
 })

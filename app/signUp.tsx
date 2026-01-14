@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from 'expo-router';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, KeyboardAvoidingView, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
 interface FormErrors{
@@ -163,8 +163,12 @@ export default function signUp() {
       };
 
   return (
-   <ScrollView style={{flex:1, padding:20, backgroundColor:'white'}}  >
-      <Ionicons name="logo-react" size={100} style={styles.shiftswaplogo} />
+   <KeyboardAvoidingView style={{flex:1,padding:10, backgroundColor:'white'}}  >
+    <View>
+       <Image source={require('@/assets/images/Logo.png')} style={styles.shiftswaplogo}></Image>
+    </View>
+   
+     
 
       <Text style={[{ fontWeight:'semibold'}, styles.titletext]}>Welcome to ShiftSwap</Text>
       <Text style={styles.text}>Manage your hospital shifts with ease</Text>
@@ -191,7 +195,7 @@ export default function signUp() {
       </View>
 
       {login && (
-        <View>
+        <View style={{flex:1}}>
          
           <Text style={styles.label}>Email</Text>
           <TextInput style={styles.textInput}
@@ -215,7 +219,7 @@ export default function signUp() {
             autoCorrect={false}
             autoCapitalize="none"
         />
-          <Pressable  onPress={() => navigation.navigate('home')}>
+          <Pressable  onPress={() => navigation.navigate('')}>
            <View style={{marginTop:10, marginBottom:20, }}>
             <Text style={{color:'#0097B2'}}>Forgot Password?</Text>
           </View>
@@ -299,14 +303,14 @@ export default function signUp() {
 
         </KeyboardAvoidingView>
       )}
-    </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
 const styles = StyleSheet.create({
   shiftswaplogo:{
-    width:100,
-    height:100,
+    width:200,
+    height:200,
     resizeMode:'contain',
     alignSelf:'center',
     marginBottom:20,
@@ -325,7 +329,8 @@ const styles = StyleSheet.create({
     },
     text:{
         color: '#0097B2',
-        fontSize: 16,
+        fontSize: 18,
+        textAlign: 'center',
         
         
     },

@@ -125,11 +125,27 @@ export const profileService = {
 
 export const shiftService = {
   // Get "My Schedule" (Upcoming or Past)
-  getMyAssignedShifts: async (view = 'upcoming') => {
-    // view can be 'upcoming' or 'past'
-    const response = await api.get(`/shifts/my-assigned?view=${view}`);
-    return response.data.data; // Assuming backend sends { success: true, data: [...] }
-  },
+ 
+
+  // In src/services/api.js inside shiftService object:
+
+getMyAssignedShifts: async (viewType = 'upcoming') => {
+  try {
+    // viewType should be 'upcoming' or 'past'
+    const response = await api.get(`/shifts/my-assigned?view=${viewType}`);
+    
+    console.log(`MY SHIFTS (${viewType}):`, response.data); // Debug log
+
+    // Handle different response structures safely
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.data?.data)) return response.data.data;
+    
+    return [];
+  } catch (error) {
+    console.error('Fetch My Shifts Error:', error);
+    return [];
+  }
+},
 
   // Get "Available Shifts" for the Feed
   getAvailableShifts: async (filters = {}) => {

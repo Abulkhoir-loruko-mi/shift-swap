@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 export default function home() {
 
@@ -100,14 +100,13 @@ export default function home() {
     <View style={{ flex:1}}>
         <View style={styles.card}>
 
-            <View style={{alignItems:"center", justifyContent:"space-between"}}>
+            <View style={{alignItems:"center",}}>
 
-                <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
+                <View style={{flexDirection:'row', alignItems:'center'}}>
 
                     <View style={{flexDirection:'row', alignItems:'center',marginRight:40}}>
-                        <View style={styles.profilecard}>
-
-                        </View>
+                      <Image source={require('@/assets/images/icon.png')} style={styles.profilecard} ></Image>
+                        
                         <View>
                             <Text style={{fontSize:18, fontWeight:"semibold",color:"white"}}>Welcome back,</Text>
                             <Text style={{fontSize:24, fontWeight:"semibold",color:"white"}}>{userData.name}</Text>
@@ -115,7 +114,7 @@ export default function home() {
 
                     </View>
                  
-                    <View style={styles.profilecards}></View>
+                    
 
                   <View style={{padding:60}}></View>
 
@@ -198,8 +197,12 @@ export default function home() {
 
 
          <View style={{ alignItems:'center'}}>
-       
+          <Pressable onPress={showschedule}>
             <Text style={{fontSize:17, fontWeight:"semibold",color:"black", padding:20}}>View full schedule</Text>
+
+          </Pressable>
+       
+            
              
          </View>
 
@@ -247,20 +250,17 @@ const styles = StyleSheet.create({
       margin:10,
       borderRadius:12,
       height:103,
-      width:138,
-      //shadowColor:'#000',
-      //shadowOffset:{width:0, height:2},
-      //shadowOpacity:0.25,
-      //shadowRadius:3.84,
+      width:'40%',
+     
       elevation:5
    },
    profilecard:{
       backgroundColor:'#D9D9D9',
-      padding:20,
-      margin:10,
-      borderRadius:20,
-      height:20,
-      width:20,
+      //padding:20,
+      marginRight:10,
+      borderRadius:25,
+      height:50,
+      width:50,
       elevation:5
    },
     profilecards:{

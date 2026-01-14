@@ -241,7 +241,9 @@ export default function completeProfile() {
         <Picker 
             selectedValue={preferedShift}
             style={{height: 50, width:'100%', }}
-            onValueChange={(itemValue) => setPreferedShift(itemValue)}>
+            onValueChange={(itemValue) => {
+              console.log("User selected:", itemValue);
+              setPreferedShift(itemValue)}}>
             <Picker.Item label="Morning" value="morning" />
             <Picker.Item label="Evening" value="evening" />
             <Picker.Item label="Night" value="night" />

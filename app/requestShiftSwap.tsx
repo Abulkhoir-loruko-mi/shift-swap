@@ -14,6 +14,8 @@ export default function requestShiftSwap() {
       const[requestsent, setRequestsent]=useState(false)
 
        const requestSwap=()=>{
+
+        
        
 
     }
@@ -27,7 +29,7 @@ export default function requestShiftSwap() {
         <Picker 
             selectedValue={shift}
             style={{height: 50, width:'100%', borderRadius:20, backgroundColor:'#F1F1F1' }}
-            onValueChange={(itemValue) => setShift(itemValue)}>
+            onValueChange={(itemValue) => {setShift(itemValue)}}>
             <Picker.Item label="Morning" value="morning" />
             <Picker.Item label="Evening" value="evening" />
             <Picker.Item label="Night" value="night" />
@@ -38,7 +40,7 @@ export default function requestShiftSwap() {
         <Picker 
             selectedValue={swaptype}
             style={{height: 50, width:'100%', borderRadius:20, backgroundColor:'#F1F1F1' }}
-            onValueChange={(itemValue) => setSwapType(itemValue)}>
+            onValueChange={(itemValue) =>{ setSwapType(itemValue)}}>
             <Picker.Item label="Open Request" value="openrequest" />
             <Picker.Item label="Direct Swap" value="directswap" />
             
@@ -49,7 +51,7 @@ export default function requestShiftSwap() {
         <Picker 
             selectedValue={replacementShift}
             style={{height: 50, width:'100%', borderRadius:20, backgroundColor:'#F1F1F1' }}
-            onValueChange={(itemValue) => setReplacementShift(itemValue)}>
+            onValueChange={(itemValue) => {setReplacementShift(itemValue)}}>
             <Picker.Item label="Morning Shift" value="morningtime" />
             <Picker.Item label="Evening shift" value="eveningtime" />
             <Picker.Item label="Any Day shift" value="anyday" />
@@ -70,7 +72,7 @@ export default function requestShiftSwap() {
         <Picker 
             selectedValue={deadline}
             style={{height: 50, width:'100%', borderRadius:20, backgroundColor:'#F1F1F1' }}
-            onValueChange={(itemValue) => setDeadline(itemValue)}>
+            onValueChange={(itemValue) => {setDeadline(itemValue)}}>
             <Picker.Item label="24Hr" value="24" />
             <Picker.Item label="12Hr" value="12" />
             
