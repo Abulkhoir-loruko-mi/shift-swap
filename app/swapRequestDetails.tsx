@@ -1,10 +1,78 @@
-import { Ionicons } from '@expo/vector-icons'
-import React from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { shiftService } from '@/src/services/api';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-export default function swapRequestDetails() {
+export default function swapRequestDetails({ route }: any) {
+    const navigation = useNavigation<any>();
+    const { requestId } = route.params;
+
+  const [details, setDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleRequestSwap = (shiftId: any) => {
+    // 1. Confirmation Dialog
+    Alert.alert(
+      'Confirm Request',
+      'Are you sure you want to request this shift?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Yes, Request It', 
+          onPress: async () => {
+            await processSwapRequest(shiftId);
+          } 
+        }
+      ]
+    );
+  };
+  
+  const processSwapRequest = async (shiftId: any) => {
+    try {
+      // 2. Call the API
+      await shiftService.requestSwap(shiftId);
+      
+      // 3. Success Feedback
+      Alert.alert('Success', 'Request sent! Waiting for manager approval.');
+      
+      // 4. Refresh the list (so the shift disappears or updates status)
+      //loadShifts(); // Re-use your existing load function
+      
+    } catch (error) {
+      Alert.alert('Error', );
+    }
+  };
+
+
+
+    useEffect(() => {
+    loadDetails();
+  }, []);
+
+  const loadDetails = async () => {
+    try {
+      const data = await shiftService.getSwapRequestDetails(requestId);
+      setDetails(data);
+    } catch (error) {
+      // If error, go back
+      alert('Could not load details');
+      navigation.goBack();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+  if (!details) return <Text style={styles.errorText}>Request not found.</Text>;
+
+ 
+  const shift = details?.shift || {};
+
   return (
     <ScrollView style={{flex:1, padding:10}}>
+
+
           <View style={styles.availableswapcard}>
             <View style={{ }}>
                 <View style={{flexDirection:'row',justifyContent:'space-between',marginBottom:20 }}>
@@ -12,8 +80,8 @@ export default function swapRequestDetails() {
                     <View style={{flexDirection:'row', alignItems:'center',}}>
                         <View style={styles.profilecard}></View>
                         <View>
-                            <Text style={{fontSize:18, fontWeight:"bold",}}>Sarah Chen,</Text>
-                            <Text style={{fontSize:16, fontWeight:"semibold", flexWrap:'wrap', wordWrap:'true',maxWidth:150,maxHeight:40}}>RN-Emergency Department </Text>
+                            <Text style={{fontSize:18, fontWeight:"bold",}}>{shift.name}</Text>
+                            <Text style={{fontSize:16, fontWeight:"semibold", flexWrap:'wrap', wordWrap:'true',maxWidth:150,maxHeight:40}}>{shift.department || 'N/A'} </Text>
                              <View style={{flexDirection:'row', alignItems:'center',padding:10}}>
                             <Ionicons name='alert' size={16}></Ionicons>
                             <Text style={styles.textr}>rating</Text>
@@ -22,12 +90,12 @@ export default function swapRequestDetails() {
                         </View>
 
                     </View>
-                    <View>
-                        <View style={styles.typeSHiftcard}>
-                        <Text style={styles.shifttext}>Direct swap</Text>
-                    </View>
+                     <Pressable  style={styles.typeSHiftcard}>
+                            <Text style={styles.shifttext}>Direct swap</Text>
+                    
+                    </Pressable>
 
-                    </View>
+                
                  
                     
 
@@ -73,11 +141,11 @@ export default function swapRequestDetails() {
                     </View>
                          <View style={{flexDirection:'row', alignItems:'center', }}>
                         <Ionicons name='time'color='black' size={16}/>
-                        <Text  style={styles.blacktext}>7:00 AM- 3:00PM</Text>
+                        <Text  style={styles.blacktext}>{shift.startTime} - {shift.endTime}</Text>
                     </View>
                      <View style={{flexDirection:'row', alignItems:'center', }}>
                         <Ionicons name='location'color='black' size={16}/>
-                        <Text style={styles.blacktext}>Emergency Department</Text>
+                        <Text style={styles.blacktext}>{shift.department || 'N/A'}</Text>
                     </View>
                     <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                         <View></View>
@@ -103,10 +171,12 @@ export default function swapRequestDetails() {
                 </View>
                 <View style={styles.reasoncard}>
                     <Text style={[styles.blacktext,{color:'#0097B2',fontWeight:'500'}]}>Reason for swap</Text>
-                    <Text style={styles.blacktext}>Family emergency - need to attend a medical appointment</Text>
+                    <Text style={styles.blacktext}>{shift.reason}</Text>
 
 
                 </View>
+
+
                 <View style={styles.shifofferedcard}>
                     <Text style={[styles.blacktext,{fontWeight:'500'}]}>Important Notes</Text>
                     <Text style={styles.text}>. All swap requests require supervisor approval </Text>
@@ -115,9 +185,9 @@ export default function swapRequestDetails() {
                 </View>
                 <View style={{marginBottom:50}}>
 
-                    <View>
+                <View>
                         
-                    </View>
+            </View>
                 </View>
       
     </ScrollView>
@@ -154,6 +224,7 @@ const styles = StyleSheet.create({
     color:'white'
 
     },
+    errorText: { textAlign: 'center', marginTop: 50 },
 
    availableswapcard:{
     //flex:1,

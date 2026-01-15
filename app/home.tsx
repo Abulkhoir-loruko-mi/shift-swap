@@ -1,11 +1,27 @@
-import { profileService, shiftService } from '@/src/services/api';
+import { notificationService, profileService, shiftService } from '@/src/services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function home() {
+  const navigation = useNavigation<any>();
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Poll for unread count every time screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      checkUnread();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const checkUnread = async () => {
+    const count = await notificationService.getUnreadCount();
+    setUnreadCount(count);
+  };
 
   type Shift = {
     id: string;
@@ -95,9 +111,24 @@ export default function home() {
     const showavailableswap=()=>{
       navigation.navigate('availableSwap')
    }
-    const navigation = useNavigation<any>();
   return (
     <View style={{ flex:1}}>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', padding: 15, paddingTop: 40, backgroundColor: 'white' }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>ShiftSwap</Text>
+          
+          <TouchableOpacity onPress={() => navigation.navigate('notifications')}>
+            <Text>🔔</Text> 
+            {/* Red Badge */}
+            {unreadCount > 0 && (
+              <View style={{ position: 'absolute', right: -5, top: -5, backgroundColor: 'red', borderRadius: 10, width: 20, height: 20, justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ color: 'white', fontSize: 10, fontWeight: 'bold' }}>{unreadCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+       </View>
+
+
         <View style={styles.card}>
 
             <View style={{alignItems:"center",}}>
@@ -111,6 +142,8 @@ export default function home() {
                             <Text style={{fontSize:18, fontWeight:"semibold",color:"white"}}>Welcome back,</Text>
                             <Text style={{fontSize:24, fontWeight:"semibold",color:"white"}}>{userData.name}</Text>
                         </View>
+
+                        
 
                     </View>
                  

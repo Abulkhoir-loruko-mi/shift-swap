@@ -170,22 +170,7 @@ export default function completeProfile() {
 
             <Text style={styles.label} >Hospital/Facility</Text>
 
-            <View style={[styles.textInputView,{alignItems:'center' },]}>
-                <Picker
-                  selectedValue={selectedFacilityId}
-                  style={{height: 50, width:'100%', }}
-                  onValueChange={(itemValue) => setSelectedFacilityId(itemValue)}
-                >
-                  <Picker.Item label="Select a Hospital..." value="" />
-                  {facilities.map((fac) => (
-                    <Picker.Item 
-                      key={fac._id}       // MongoDB ID as key
-                      label={fac.name}    // Show Name to user
-                      value={fac._id}     // Save ID to state
-                    />
-                  ))}
-                </Picker>
-              </View>
+          
             <View style={[styles.textInputView,{flexDirection:'row',alignItems:'center'},]}>
                 <Ionicons name='location' size={16}/>
                 

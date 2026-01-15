@@ -118,23 +118,20 @@ export const profileService = {
     }
   }
   
-  // GET /facilities - Helper to populate Facility Dropdown in Step 1
+ 
  
 };
 
 
 export const shiftService = {
-  // Get "My Schedule" (Upcoming or Past)
- 
-
-  // In src/services/api.js inside shiftService object:
+  
 
 getMyAssignedShifts: async (viewType = 'upcoming') => {
   try {
     // viewType should be 'upcoming' or 'past'
     const response = await api.get(`/shifts/my-assigned?view=${viewType}`);
     
-    console.log(`MY SHIFTS (${viewType}):`, response.data); // Debug log
+    console.log(`MY SHIFTS (${viewType}):`, response.data); 
 
     // Handle different response structures safely
     if (Array.isArray(response.data)) return response.data;
@@ -157,14 +154,94 @@ getMyAssignedShifts: async (viewType = 'upcoming') => {
 
   // Request to Swap (Pick Up)
   requestSwap: async (shiftId) => {
-    const response = await api.post('/swap-requests', { shiftId });
-    return response.data;
+    try {
+      console.log('requsting available swap', shiftId)
+      const response = await api.post('/swap-requests', { shiftId });
+      console.log('request success', response.data)
+      return response.data;
+      
+    } catch (error) {
+      const serverMessage= error.response?.data?.message || 'Request failed'
+      throw new Error(serverMessage)
+      
+    }
+    
+    
+  },
+
+
+
+  getSwapRequestDetails: async (requestId) => {
+    try {
+      const response = await api.get(`/swap-requests/${requestId}`);
+      console.log('SWAP DETAILS:', response.data);
+      // Accessing data based on your standard pattern
+      return response.data?.data || response.data;
+    } catch (error) {
+      console.error('Error fetching request details:', error);
+      throw error;
+    }
+  },
+
+  // "Give Away" shift (Mark as Available) this is not providded in backend doc but i added it
+  postShift: async (shiftId) => {
+    try {
+      console.log('ATTEMPTING TO POST SHIFT:', shiftId);
+      
+      
+      const response = await api.put(`/shifts/${shiftId}`, {
+        status: 'available', 
+        isDropRequest: true  
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Post Shift Error:', error);
+      throw error;
+    }
   },
   
   // Get history of my requests
   getMySwapRequests: async () => {
     const response = await api.get('/swap-requests/my-requests');
     return response.data.data;
+  }
+};
+
+
+
+export const notificationService = {
+ 
+  getAll: async (filter = 'all') => {
+    try {
+      const response = await api.get(`/notifications?filter=${filter}`);
+      return response.data?.data || [];
+    } catch (error) {
+      console.error('Fetch Notifications Error:', error);
+      return [];
+    }
+  },
+
+  
+  getUnreadCount: async () => {
+    try {
+      const response = await api.get('/notifications/unread-count');
+      // Assuming response: { success: true, data: { count: 5 } }
+      return response.data?.data?.count || 0;
+    } catch (error) {
+      return 0;
+    }
+  },
+
+  
+  markAsRead: async (notificationId) => {
+    try {
+      await api.post('/notifications/mark-read', { notificationId });
+      return true;
+    } catch (error) {
+      console.error('Mark Read Error:', error);
+      return false;
+    }
   }
 };
 

@@ -1,11 +1,109 @@
-import { Ionicons } from '@expo/vector-icons'
-import React from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { shiftService } from '@/src/services/api';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 export default function availableSwap() {
+    const navigation = useNavigation<any>();
+
+     type Shift = {
+        id: string;
+        date: string;
+        startTime: string;
+        endTime: string;
+        _id:any
+      };
+    
+      const [shifts, setShifts] = useState<Shift[]>([]);
+      const [loading, setLoading] = useState(true);
+      const [refreshing, setRefreshing] = useState(false);
+
+      
+
+
+    const loadShifts = async () => {
+       try {
+         // You can pass filters here later, e.g., { department: 'ICU' }
+         const data = await shiftService.getAvailableShifts();
+         setShifts(data);
+       } catch (error) {
+         console.error(error);
+         // Optional: Show a subtle toast instead of an Alert for a feed error
+       } finally {
+         setLoading(false);
+         setRefreshing(false);
+       }
+     };
+   
+     // 2. Load on Mount
+     useEffect(() => {
+       loadShifts();
+     }, []);
+   
+     // 3. Handle Pull-to-Refresh
+     const onRefresh = () => {
+       setRefreshing(true);
+       loadShifts();
+     };
+
+  
+
+const handleRequestSwap = (shiftId: any) => {
+  // 1. Confirmation Dialog
+  Alert.alert(
+    'Confirm Request',
+    'Are you sure you want to request this shift?',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      { 
+        text: 'Yes, Request It', 
+        onPress: async () => {
+          await processSwapRequest(shiftId);
+        } 
+      }
+    ]
+  );
+};
+
+const processSwapRequest = async (shiftId: any) => {
+  try {
+    // 2. Call the API
+    await shiftService.requestSwap(shiftId);
+    
+    // 3. Success Feedback
+    Alert.alert('Success', 'Request sent! Waiting for manager approval.');
+    
+    // 4. Refresh the list (so the shift disappears or updates status)
+    loadShifts(); // Re-use your existing load function
+    
+  } catch (error) {
+    Alert.alert('Error', );
+  }
+};
+
+
   return (
-    <ScrollView style={styles.container}>
-        <View style={styles.availableswapcard}>
+    <View style={styles.container}>
+
+          <FlatList
+                 data={shifts}
+                 keyExtractor={(item) => item.id}
+                 refreshControl={
+                  <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+                ListEmptyComponent={
+                  <Text style={{ textAlign: 'center', marginTop: 50, color: '#777' }}>
+                    No shifts available for swap right now.
+                  </Text>
+                }
+                renderItem={({item})=>(
+
+                    
+        
+                
+
+                    <Pressable style={styles.availableswapcard} onPress={() => navigation.navigate('swapRequestDetails', { requestId: item._id })}>
             <View style={{ }}>
                 <View style={{flexDirection:'row',justifyContent:'space-between',marginBottom:20 }}>
 
@@ -18,9 +116,13 @@ export default function availableSwap() {
 
                     </View>
                     <View>
-                        <View style={styles.typeSHiftcard}>
-                        <Text style={styles.shifttext}>Direct swap</Text>
-                    </View>
+                        <Pressable onPress={() => handleRequestSwap(item._id)}  style={styles.typeSHiftcard}>
+                             <Text style={styles.shifttext}>Direct swap</Text>
+
+                        </Pressable>
+                       
+                       
+                   
 
                     </View>
                  
@@ -64,9 +166,21 @@ export default function availableSwap() {
              <Text style={styles.blacktext}>Posted:2 hours ago</Text>
              <Text style={styles.blacktext}>Deadline: 24 hours</Text>
 
-        </View>
+        </Pressable>
 
-          <View style={styles.availableswapcard}>
+
+
+                
+        
+                )}
+                 
+                 
+                 ></FlatList>
+
+
+     
+
+          <Pressable style={styles.availableswapcard} onPress={() => navigation.navigate('swapRequestDetails', { requestId: shifts[1]?._id })}>
             <View style={{ }}>
                 <View style={{flexDirection:'row',justifyContent:'space-between',marginBottom:20 }}>
 
@@ -79,9 +193,10 @@ export default function availableSwap() {
 
                     </View>
                     <View>
-                        <View style={styles.typeSHiftcard}>
-                        <Text style={styles.shifttext}>Direct swap</Text>
-                    </View>
+                     <Pressable onPress={() => handleRequestSwap(shifts[1]?._id)} style={styles.typeSHiftcard}>
+                             <Text style={styles.shifttext}>Direct swap</Text>
+
+                        </Pressable>
 
                     </View>
                  
@@ -125,7 +240,7 @@ export default function availableSwap() {
              <Text style={styles.blacktext}>Posted:2 hours ago</Text>
              <Text style={styles.blacktext}>Deadline: 24 hours</Text>
 
-        </View>
+        </Pressable>
          <View style={{marginBottom:50}}>
         
                             <View>
@@ -134,7 +249,7 @@ export default function availableSwap() {
                         </View>
        
       
-    </ScrollView>
+    </View>
   )
 }
 

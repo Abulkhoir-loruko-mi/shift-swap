@@ -18,6 +18,7 @@ export default function RootLayout() {
          <Stack.Screen name="swapRequestDetails" options={{ headerShown: true, title:'Swap Request Details',headerTintColor:'#00797B', }} />
           <Stack.Screen name="requestShiftSwap" options={{ headerShown: true, title:'Request shift Swap',headerTintColor:'#00797B', }} />
         <Stack.Screen name="completeProfile" options={{ headerShown: false }} />
+        
        
       </Stack>
     

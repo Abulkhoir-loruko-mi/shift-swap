@@ -42,51 +42,9 @@ export default function signUp() {
         setLogin(false);
     }
 
-  const API_BASE_URL  = 'https://shiftswap-backend-4w40.onrender.com/api';
+  
 
-  const handleRegisters= async ()=>{
-
-    try {
-      const response= await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-            body: JSON.stringify({
-        name: name,
-        email: emails,
-        password:passwords,
-        phoneNumber:phoneNumber,
-        role: 'staff', // 'staff' or 'manager'
-        department: 'Emergency',
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(data.message || "reg failed");
-    }
-    await AsyncStorage.setItem('token',data.data.token)
-    console.log('reg succesful:', data.data)
-    return data.data
-    } catch (error) {
-      console.error('reg error', error)
-      throw error    
-    }
-  }
-
-  const handleRegisterss=async ()=>{
-    setLoading(true);
-    try {
-      await handleRegisters();
-      showlogin   
-    } catch (error) {
-      console.log(error)  
-    }finally{
-      setLoading(false)
-    }
-  }
+ 
 
     const handleRegister = async () => {
     // 1. Basic Validation
