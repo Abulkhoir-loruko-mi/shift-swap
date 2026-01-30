@@ -1,50 +1,94 @@
-# Welcome to your Expo app 👋
+# ShiftSwap 🏥📱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**A Mobile Shift Management Solution for Healthcare Professionals**
 
-## Get started
+ShiftSwap is a mobile application designed to solve the chaos of hospital shift scheduling. It allows nurses and medical staff to view their schedules, request shift swaps seamlessly, and manage their availability in real-time.
 
-1. Install dependencies
+> **Note:** This project was built as the Capstone Project for the **Tech4Africans Mobile Development Bootcamp** (2026).
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## 🚀 Key Features
 
-   ```bash
-   npx expo start
-   ```
+* **🔐 Secure Authentication:** Robust Login and Registration flow with validation and error handling.
+* **📅 My Schedule:** clear, chronological view of assigned shifts using data fetched from the backend.
+* **🔄 Smart Swap System:**
+    * Users can request swaps for specific shifts.
+    * **Complex Validation:** Implemented logic to handle swap reasons, deadlines, and status checks (e.g., preventing swaps on already-requested shifts).
+* **📋 Available Swaps:** A marketplace view where colleagues can see and accept dropped shifts.
+* **👤 Profile Management:** User details and role management.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠️ Tech Stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+* **Framework:** React Native (Expo SDK 52)
+* **Language:** JavaScript (ES6+)
+* **Navigation:** React Navigation (Stack & Tabs) / Expo Router
+* **Networking:** Axios (with Interceptors for error handling)
+* **State Management:** React Hooks (`useState`, `useEffect`)
+* **Backend:** Node.js/Express & MongoDB (consumed via API)
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 💡 Technical Highlights & Wins
 
-```bash
-npm run reset-project
-```
+Building ShiftSwap involved overcoming significant technical challenges:
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+1.  **API Payload Management:**
+    * Successfully structured complex JSON payloads for the `/swap-requests` endpoint, ensuring strict data types (ISO Dates, Snake_case vs CamelCase) matched backend requirements.
+2.  **Error Handling Architecture:**
+    * Implemented a robust error parsing system to catch `400 Bad Request` and `Validation Failed` errors, translating raw backend messages into user-friendly alerts.
+3.  **Real-Device Testing:**
+    * Optimized the app for production APK builds, resolving "White Screen" UI issues related to Dark Mode system settings.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 📸 Screenshots
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| Login Screen | My Schedule | Swap Request |
+|:---:|:---:|:---:|
+| *(Add Screenshot Here)* | *(Add Screenshot Here)* | *(Add Screenshot Here)* |
 
-## Join the community
+> *To add screenshots: Upload images to your repo and paste the links above.*
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## ⚙️ Installation & Setup
+
+To run this project locally:
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/Abulkhoir-loruko-mi/shift-swa(https://github.com/Abulkhoir-loruko-mi/shift-swap.git))
+    cd ShiftSwap
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+
+3.  **Start the server:**
+    ```bash
+    npx expo start
+    ```
+
+4.  **Run on Device:**
+    * Download the **Expo Go** app on Android/iOS.
+    * Scan the QR code from the terminal.
+
+---
+
+## 🔮 Future Improvements
+
+* **Push Notifications:** To alert users when a swap request is accepted.
+* **Admin Dashboard:** For hospital managers to approve/deny final rosters.
+* **In-App Chat:** Allowing users to discuss swap details before confirming.
+
+---
+
+**Author:**Oladeji Sooliu 
+**Contact:** oladejisoliu@gmail.com
